@@ -1,10 +1,18 @@
-// Define the User schema for MongoDB.
-const mongoose = require("mongoose");
-const UserSchema = new mongoose.Schema(
+const { DataTypes } = require("sequelize");
+const sequelize = require("../config/db");
+
+const User = sequelize.define(
+  "User",
   {
-    email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
+    id: {
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
+      primaryKey: true,
+    },
+    email: { type: DataTypes.STRING, unique: true, allowNull: false },
+    password: { type: DataTypes.STRING, allowNull: false },
   },
   { timestamps: true }
 );
-module.exports = mongoose.model("User", UserSchema);
+
+module.exports = User;

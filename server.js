@@ -1,23 +1,23 @@
-require("dotenv").config();
 const express = require("express");
-const cors = require("cors");
-const helmet = require("helmet");
-const rateLimit = require("express-rate-limit");
-const connectDB = require("./config/db");
+const sequelize = require("./config/db");
 const authRoutes = require("./routes/auth");
 const userRoutes = require("./routes/users");
+const rateLimiter = require("./utils/rateLimiter");
+const errorHandler = require("./middleware/errorHandler");
 
 const app = express();
-connectDB();
-
-// Middlewares
 app.use(express.json());
-app.use(cors());
-app.use(helmet());
-app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 100 })); // Rate limiting
+app.use(rateLimiter);
 
-// Routes
-app.use("/api/auth", authRoutes);
-app.use("/api/users", userRoutes);
+app.use("/auth", authRoutes);
+app.use("/users", userRoutes);
 
-app.listen(5000, () => console.log("✅ Server running on port 5000"));
+// Apply error handler (MUST be the last middleware)
+app.use(errorHandler);
+
+sequelize
+  .sync()
+  .then(() => console.log("Database connected"))
+  .catch((err) => console.error("Error connecting to DB", err));
+
+app.listen(3000, () => console.log("Server running on port 3000"));
